@@ -1,0 +1,28 @@
+{
+  "name": "gartic-phone",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "express": "^4.21.1",
+    "next": "14.2.15",
+    "react": "^18",
+    "react-dom": "^18",
+    "socket.io": "^4.8.0",
+    "socket.io-client": "^4.8.0",
+    "zustand": "^5.0.0-rc.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  }
+}
