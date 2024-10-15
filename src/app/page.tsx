@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { socket } from "../../lib/socket";
+import { useStore } from "../../store/store";
 
 interface CreateRoomForm {
   username: string;
@@ -14,12 +15,18 @@ interface RoomJoinedData {
 }
 
 const CreateRoomPage: React.FC = () => {
-  const [username, setUsername] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
+  const { 
+    updateMembers,
+    setUsername,
+    username
+  } = useStore();
 
   useEffect(() => {
     const handleRoomJoined = ({ user, roomId, members }: RoomJoinedData) => {
+      updateMembers(members);
+      setUsername(user);
       console.log("Room joined:", { user, roomId, members });
       localStorage.setItem('roomInfo', JSON.stringify({ roomId, user }));
       router.push(`/room/${roomId}`);

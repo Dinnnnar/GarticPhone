@@ -1,36 +1,28 @@
 import React, { useState, useEffect } from 'react';
+
+import { useParams } from 'next/navigation';
+import { joinRoom } from '../tools/joinRoom';
 import { useStore } from '../store/store';
 
-interface UsernameModalProps {
-  currentUsername: string;
-  setUsername: React.Dispatch<React.SetStateAction<string>>;
-  isModalOpen: boolean;
-  onSubmit: () => void;
-}
-
-const UsernameModal: React.FC<UsernameModalProps> = ({
-  currentUsername,
-  setUsername,
-  isModalOpen,
-  onSubmit,
-}) => {
-  
-  const updateUsername = useStore(state => state.updateUsername);
-  const username = useStore(state => state.username);
+const UsernameModal: React.FC = () => {
+  const { setUsername, username, setIsModalOpen, isConnected, setIsConnected } = useStore();
   const [inputValue, setInputValue] = useState<string>(username);
+  const { roomId } = useParams();
+
   useEffect(() => {
-    setInputValue(username); // Обновляем поле при изменении имени пользователя
+    setInputValue(username);
   }, [username]);
 
   const handleSubmit = () => {
     if (inputValue.trim()) {
-      updateUsername(inputValue);
-      // setUsername(inputValue); 
-      onSubmit();   
+      setUsername(inputValue); 
+      localStorage.setItem('roomInfo', JSON.stringify({ user: inputValue }));
+      setIsModalOpen(false);
+      joinRoom(isConnected, setIsConnected, setUsername, username, setIsModalOpen, roomId as string);
     }
   };
 
-  return isModalOpen ? (
+  return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
       backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
@@ -40,7 +32,8 @@ const UsernameModal: React.FC<UsernameModalProps> = ({
         <h2>Choose your username</h2>
         <input
           type="text"
-          onChange={(e) => updateUsername(e.target.value)}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
           style={{ margin: "0.5rem", padding: "0.5rem" }}
         />
         <button onClick={handleSubmit} style={{ margin: "0.5rem", padding: "0.5rem" }}>
@@ -48,7 +41,7 @@ const UsernameModal: React.FC<UsernameModalProps> = ({
         </button>
       </div>
     </div>
-  ) : null;
+  );
 };
 
 export default UsernameModal;
