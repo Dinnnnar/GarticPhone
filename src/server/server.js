@@ -2,7 +2,7 @@ import { app, httpServer, io } from "./core.js";
 import bot from './bot.js';
 
 app.use(await bot.createWebhook({ 
-  domain: 'https://5cba-194-226-199-2.ngrok-free.app'
+  domain: 'https://something'
 }));
 
 httpServer.listen(3000, () => 
