@@ -9,7 +9,7 @@ export function setupSocketHandlers(io) {
         );
         socket.on('disconnect', (reason) => disconnectUser(io, socket, reason));
         socket.on('start-game', (roomId) => startGame(io, socket, roomId));
-        socket.on('theme', ({ theme, roomId }) => handleTheme(io, socket, theme, roomId));
+        socket.on('theme', ({ data, roomId }) => handleData(io, socket, data, roomId));
         socket.on('timer', (roomId) => handleTimer(io, socket, roomId));
     });
 }
@@ -128,7 +128,7 @@ function startGame(io, socket, roomId) {
     setTimer(io, roomId, 15000, 'themePhase');
 }
 
-function handleTheme(io, socket, theme, roomId) {
+function handleData(io, socket, data, roomId) {
     const room = rooms[roomId];
     if (!room) {
         console.warn(`Room with ID ${roomId} not found.`);
@@ -153,9 +153,19 @@ function handleTheme(io, socket, theme, roomId) {
         room.data[room.roundCount] = [];
     }
 
-    room.data[room.roundCount][member.number] = theme;
+    room.data[room.roundCount][member.number] = data;
     console.log(room.data);
-    console.log(`User ${member.username} wrote theme: ${theme}`);
+    console.log(`User ${member.username} wrote theme: ${data}`);
+
+    if (room.data[room.roundCount].length === room.finalCount + 1) {
+        clearInterval(room.intervalID);
+        clearTimeout(room.timeoutID);
+        delete room.intervalID;
+        delete room.timeoutID;
+        const nextPhase = typeof data === 'string' ? 'drawPhase' : 'themePhase';
+        const time = nextPhase === 'drawPhase' ? 30000 : 15000;
+        setTimer(io, roomId, time, nextPhase);
+    }
 }
 
 async function handleTimer(io, socket, roomId) {
@@ -182,7 +192,8 @@ function setTimer(io, roomId, time, nextPhase) {
     room.timer = time / 1000;
 
     if (room.roundCount === room.finalCount + 1) {
-        io.emit('room-updated', 'presentation');
+        console.log('finally');
+        io.emit('phase-updated', { phase: 'presentation' });
         return;
     }
 

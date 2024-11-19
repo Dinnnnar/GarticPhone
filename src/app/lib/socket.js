@@ -1,7 +1,6 @@
 import { io, Socket } from 'socket.io-client';
-import dotenv from 'dotenv';
-dotenv.config({ path: '../../.env' });
 
-const SERVER = process.env.NODE_ENV === 'production' ? 'something' : process.env.WEBHOOK_DOMAIN;
+const SERVER = import.meta.env.VITE_WEBHOOK_DOMAIN;
+console.log('server', SERVER);
 
 export const socket = io(SERVER, { transports: ['websocket'] });

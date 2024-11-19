@@ -7,8 +7,6 @@ import StartButton from './components/StartButton';
 import UserLanding from './components/UserLanding';
 import ThemeComponent from './components/ThemeComponent';
 import DrawComponent from './components/DrawComponent';
-import dotenv from 'dotenv';
-dotenv.config({ path: '../../.env' });
 
 const App = () => {
     const query = new URLSearchParams(location.search);
