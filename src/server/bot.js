@@ -11,7 +11,7 @@ bot.command('game', (ctx) =>
     ctx.reply(
         'Launch mini app from inline keyboard!',
         Markup.inlineKeyboard([
-            Markup.button.webApp('Launch', `https://tdhjd4qq-5173.euw.devtunnels.ms?room=9999`),
+            Markup.button.webApp('Launch', `https://hw7m8gq2-5173.euw.devtunnels.ms//?room=9999`),
         ])
     )
 );

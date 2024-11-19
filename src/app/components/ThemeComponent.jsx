@@ -4,7 +4,7 @@ import { useStore } from '../store/store';
 import Timer from './Timer';
 
 function ThemeComponent() {
-    const { block, timer } = useStore();
+    const { block } = useStore();
     const query = new URLSearchParams(location.search);
     const roomId = query.get('room');
 

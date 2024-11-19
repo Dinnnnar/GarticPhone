@@ -26,7 +26,7 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
     socket.join(roomId);
 
     if (!rooms[roomId]) {
-        rooms[roomId] = { members: [], currentPhase: 'lobby' };
+        rooms[roomId] = { members: [], currentPhase: 'lobby', data: [] };
     }
 
     const existingUserIndex = rooms[roomId].members.findIndex(
@@ -46,6 +46,7 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
             username,
             photoUrl,
             isLeader: rooms[roomId].members.length === 0,
+            number: rooms[roomId].members.length + 1,
         });
         rooms[roomId].playerCount += 1;
     }
@@ -96,6 +97,7 @@ function disconnectUser(io, socket, reason) {
                 }
             }
             if (rooms[roomId].playerCount === 0) {
+                clearInterval(rooms[roomId].intervalID);
                 delete rooms[roomId];
             } else {
                 io.to(roomId).emit('room-updated', {
@@ -115,34 +117,96 @@ function disconnectUser(io, socket, reason) {
 }
 
 function startGame(io, socket, roomId) {
-    const index = rooms[roomId].members.findIndex((member) => member.id === socket.id);
-    rooms[roomId].currentPhase = 'themePhase';
-    setTimer(io, roomId, 15000, 'drawPhase');
-    io.to(roomId).emit('phase-updated', { phase: 'themePhase' });
+    const room = rooms[roomId];
+    if (!room) return;
+
+    room.currentPhase = 'themePhase';
+    room.roundCount = 0;
+
+    room.finalCount = room.members.length;
+
+    setTimer(io, roomId, 15000, 'themePhase');
 }
 
 function handleTheme(io, socket, theme, roomId) {
-    const index = rooms[roomId].members.findIndex((member) => member.id === socket.id);
-    rooms[roomId].members[index].block = true;
+    const room = rooms[roomId];
+    if (!room) {
+        console.warn(`Room with ID ${roomId} not found.`);
+        return;
+    }
+
+    const memberIndex = room.members?.findIndex((member) => member.id === socket.id);
+    if (memberIndex === -1) {
+        console.warn(`Member with socket ID ${socket.id} not found in room ${roomId}.`);
+        return;
+    }
+
+    const member = room.members[memberIndex];
+    member.block = true;
     socket.emit('block', { block: true });
-    console.log(`User ${rooms[roomId].members[index].username} write theme: ${theme}`);
+
+    if (!room.data) {
+        room.data = [];
+    }
+
+    if (!room.data[room.roundCount]) {
+        room.data[room.roundCount] = [];
+    }
+
+    room.data[room.roundCount][member.number] = theme;
+    console.log(room.data);
+    console.log(`User ${member.username} wrote theme: ${theme}`);
 }
 
-function handleTimer(io, socket, roomId) {
-    console.log('User has started the game', 15);
-    socket.emit('timer-updated', { timer: rooms[roomId].timer });
+async function handleTimer(io, socket, roomId) {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    while (!room?.timer) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    socket.emit('timer-updated', { timer: room.timer });
 }
 
-function setTimer(io, roomId, time, phase) {
-    const installedTime = Math.floor((+new Date() + time) / 1000);
-    const timerID = setInterval(() => {
-        const currentTime = Math.floor(+new Date() / 1000);
-        rooms[roomId].timer = installedTime - currentTime;
-        console.log(rooms[roomId].timer);
+function setTimer(io, roomId, time, nextPhase) {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    room.roundCount += 1;
+    console.log('@@@ Current round: ', room.roundCount);
+
+    io.emit('phase-updated', { phase: nextPhase });
+
+    const endTime = Math.floor((Date.now() + time) / 1000);
+    room.timer = time / 1000;
+
+    if (room.roundCount === room.finalCount + 1) {
+        io.emit('room-updated', 'presentation');
+        return;
+    }
+
+    room.intervalID = setInterval(() => {
+        const currentTime = Math.floor(Date.now() / 1000);
+        room.timer = endTime - currentTime;
+
+        console.log(room.timer);
+
+        if (room.timer <= 0) {
+            clearInterval(room.intervalID);
+            delete room.intervalID;
+        }
     }, 1000);
-    const timeOutID = setTimeout(() => {
-        io.emit('phase-updated', { phase: phase });
-        rooms[roomId].currentPhase = phase;
-        clearInterval(timerID);
+
+    room.timeoutID = setTimeout(() => {
+        room.currentPhase = nextPhase;
+        if (room.intervalID) {
+            clearInterval(room.intervalID);
+            delete room.intervalID;
+        }
+
+        nextPhase = nextPhase === 'drawPhase' ? 'themePhase' : 'drawPhase';
+        time = time === 15000 ? 30000 : 15000;
+        setTimer(io, roomId, time, nextPhase);
     }, time);
 }

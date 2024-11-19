@@ -3,7 +3,7 @@ import bot from './bot.js';
 
 app.use(
     await bot.createWebhook({
-        domain: 'https://5f39-194-226-199-2.ngrok-free.app',
+        domain: 'https://hw7m8gq2-3000.euw.devtunnels.ms/',
     })
 );
 
