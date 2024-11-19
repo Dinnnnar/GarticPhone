@@ -1,6 +1,8 @@
 import { Telegraf, Markup } from 'telegraf';
-console.log(process.env.TOKEN);
-const TOKEN = process.env.TOKEN || '7758041676:AAGrQ6akwx6b9wsKPfs9KRhSKm5p--Piuxs';
+import dotenv from 'dotenv';
+dotenv.config({ path: '../../.env' });
+
+const TOKEN = process.env.TELEGRAM_TOKEN || 'YOUR TELEGRAM TOKEN';
 const bot = new Telegraf(TOKEN);
 
 bot.command('start', (ctx) => {
@@ -10,9 +12,7 @@ bot.command('start', (ctx) => {
 bot.command('game', (ctx) =>
     ctx.reply(
         'Launch mini app from inline keyboard!',
-        Markup.inlineKeyboard([
-            Markup.button.webApp('Launch', `https://hw7m8gq2-5173.euw.devtunnels.ms//?room=9999`),
-        ])
+        Markup.inlineKeyboard([Markup.button.webApp('Launch', process.env.WEB_APP_DOMAIN)])
     )
 );
 

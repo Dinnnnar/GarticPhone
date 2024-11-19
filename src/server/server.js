@@ -3,7 +3,7 @@ import bot from './bot.js';
 
 app.use(
     await bot.createWebhook({
-        domain: 'https://hw7m8gq2-3000.euw.devtunnels.ms/',
+        domain: process.env.WEBHOOK_DOMAIN,
     })
 );
 
