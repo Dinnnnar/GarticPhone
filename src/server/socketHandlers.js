@@ -1,3 +1,5 @@
+import Latin from './tools/Latin.js';
+
 const rooms = {};
 
 export function setupSocketHandlers(io) {
@@ -9,7 +11,7 @@ export function setupSocketHandlers(io) {
         );
         socket.on('disconnect', (reason) => disconnectUser(io, socket, reason));
         socket.on('start-game', (roomId) => startGame(io, socket, roomId));
-        socket.on('theme', ({ data, roomId }) => handleData(io, socket, data, roomId));
+        socket.on('data', ({ data, roomId }) => handleData(io, socket, data, roomId));
         socket.on('timer', (roomId) => handleTimer(io, socket, roomId));
     });
 }
@@ -125,6 +127,10 @@ function startGame(io, socket, roomId) {
 
     room.finalCount = room.members.length;
 
+    const List = new Latin(room.finalCount);
+    room.list = List;
+    console.log(List);
+
     setTimer(io, roomId, 15000, 'themePhase');
 }
 
@@ -153,9 +159,12 @@ function handleData(io, socket, data, roomId) {
         room.data[room.roundCount] = [];
     }
 
-    room.data[room.roundCount][member.number] = data;
-    console.log(room.data);
-    console.log(`User ${member.username} wrote theme: ${data}`);
+    let number;
+
+    // room.data[room.roundCount][member.number] = data;
+    // подумать
+    number = room.list[room.roundCount - 1].findIndex((item) => item === member.number);
+    room.data[room.roundCount][number] = data;
 
     if (room.data[room.roundCount].length === room.finalCount + 1) {
         clearInterval(room.intervalID);
@@ -166,6 +175,28 @@ function handleData(io, socket, data, roomId) {
         const time = nextPhase === 'drawPhase' ? 30000 : 15000;
         setTimer(io, roomId, time, nextPhase);
     }
+}
+/// ПОдумать
+function handleDataRequest(io, socket, roomId) {
+    const room = rooms[roomId];
+    if (!room) {
+        console.warn(`Room with ID ${roomId} not found.`);
+        return;
+    }
+
+    const memberIndex = room.members?.findIndex((member) => member.id === socket.id);
+    if (memberIndex === -1) {
+        console.warn(`Member with socket ID ${socket.id} not found in room ${roomId}.`);
+        return;
+    }
+
+    const member = room.members[memberIndex];
+
+    number = room.list[room.roundCount - 1].findIndex((item) => item === member.number);
+
+    const data = room.data[room.roundCount - 1][number];
+
+    socket.emit('data', data);
 }
 
 async function handleTimer(io, socket, roomId) {
@@ -200,8 +231,6 @@ function setTimer(io, roomId, time, nextPhase) {
     room.intervalID = setInterval(() => {
         const currentTime = Math.floor(Date.now() / 1000);
         room.timer = endTime - currentTime;
-
-        console.log(room.timer);
 
         if (room.timer <= 0) {
             clearInterval(room.intervalID);

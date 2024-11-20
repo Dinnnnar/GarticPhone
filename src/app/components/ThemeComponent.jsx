@@ -10,7 +10,7 @@ function ThemeComponent() {
 
     const handleClick = () => {
         document.getElementById('submitThemeButton').setAttribute('disabled', 'disabled');
-        socket.emit('theme', { data: `${document.getElementById('initialtext').value}`, roomId });
+        socket.emit('data', { data: `${document.getElementById('initialtext').value}`, roomId });
     };
 
     return (

@@ -1,13 +1,16 @@
-// import Brush from "../tools/Brush";
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import Timer from './Timer';
+import Brush from '../lib/Brush';
+import { socket } from '../lib/socket';
 
 function DrawComponent() {
     const canvasRef = useRef();
+    const query = new URLSearchParams(location.search);
+    const roomId = query.get('room');
 
-    // useEffect(() => {
-    //     new Brush(canvasRef.current, socket);
-    // }, []);
+    useEffect(() => {
+        new Brush(canvasRef.current, socket, roomId);
+    }, []);
 
     return (
         <div className="Draw">
