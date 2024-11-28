@@ -12,6 +12,7 @@ export function setupSocketHandlers(io) {
         socket.on('disconnect', (reason) => disconnectUser(io, socket, reason));
         socket.on('start-game', (roomId) => startGame(io, socket, roomId));
         socket.on('data', ({ data, roomId }) => handleData(io, socket, data, roomId));
+        socket.on('data-request', ({ roomId }) => handleDataRequest(io, socket, roomId));
         socket.on('timer', (roomId) => handleTimer(io, socket, roomId));
     });
 }
@@ -166,6 +167,8 @@ function handleData(io, socket, data, roomId) {
     number = room.list[room.roundCount - 1].findIndex((item) => item === member.number);
     room.data[room.roundCount][number] = data;
 
+    console.log(room.data);
+
     if (room.data[room.roundCount].length === room.finalCount + 1) {
         clearInterval(room.intervalID);
         clearTimeout(room.timeoutID);
@@ -217,16 +220,17 @@ function setTimer(io, roomId, time, nextPhase) {
     room.roundCount += 1;
     console.log('@@@ Current round: ', room.roundCount);
 
-    io.emit('phase-updated', { phase: nextPhase });
-
-    const endTime = Math.floor((Date.now() + time) / 1000);
-    room.timer = time / 1000;
-
     if (room.roundCount === room.finalCount + 1) {
+        room.currentPhase = 'presentation';
         console.log('finally');
         io.emit('phase-updated', { phase: 'presentation' });
         return;
     }
+
+    io.emit('phase-updated', { phase: nextPhase });
+
+    const endTime = Math.floor((Date.now() + time) / 1000);
+    room.timer = time / 1000;
 
     room.intervalID = setInterval(() => {
         const currentTime = Math.floor(Date.now() / 1000);

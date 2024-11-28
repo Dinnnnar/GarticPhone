@@ -13,4 +13,6 @@ export const useStore = create((set) => ({
     updateBlock: (newValue) => set({ block: newValue }),
     timer: 0,
     updateTimer: (newTime) => set({ timer: newTime }),
+    theme: '',
+    updateTheme: (newTheme) => set({ theme: newTheme }),
 }));
