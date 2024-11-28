@@ -7,6 +7,7 @@ import StartButton from './components/StartButton';
 import UserLanding from './components/UserLanding';
 import ThemeComponent from './components/ThemeComponent';
 import DrawComponent from './components/DrawComponent';
+import DescribeComponent from './components/DescribeComponent';
 
 const App = () => {
     const query = new URLSearchParams(location.search);
@@ -92,6 +93,8 @@ const App = () => {
 
             {phase === 'themePhase' && <UserLanding />}
             {phase === 'themePhase' && <ThemeComponent />}
+
+            {phase === 'describePhase' && <DescribeComponent />}
 
             {phase === 'drawPhase' && <DrawComponent />}
 

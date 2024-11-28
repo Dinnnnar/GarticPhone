@@ -15,6 +15,7 @@ function DrawComponent() {
         const room = query.get('room');
         setRoomId(room);
 
+        console.log('Render a draw component');
         if (room && isFirstRender.current) {
             socket.emit('data-request', { roomId: room });
             isFirstRender.current = false;

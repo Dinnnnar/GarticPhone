@@ -150,7 +150,7 @@ function handleData(io, socket, data, roomId) {
 
     const member = room.members[memberIndex];
 
-    if (room.currentPhase === 'themePhase') {
+    if (room.currentPhase === 'themePhase' || room.currentPhase === 'describePhase') {
         member.block = true;
         socket.emit('block', { block: true });
     } else {
@@ -177,12 +177,15 @@ function handleData(io, socket, data, roomId) {
 
     console.log('Количество отправленных данных на текущий раунд', receivedDataCount);
 
-    if (receivedDataCount === room.finalCount && room.currentPhase === 'themePhase') {
+    if (
+        (receivedDataCount === room.finalCount && room.currentPhase === 'describePhase') ||
+        (receivedDataCount === room.finalCount && room.currentPhase === 'themePhase')
+    ) {
         clearInterval(room.intervalID);
         clearTimeout(room.timeoutID);
         delete room.intervalID;
         delete room.timeoutID;
-        const nextPhase = typeof data === 'string' ? 'drawPhase' : 'themePhase';
+        const nextPhase = typeof data === 'string' ? 'drawPhase' : 'describePhase';
         const time = nextPhase === 'drawPhase' ? 30000 : 15000;
         setTimer(io, roomId, time, nextPhase);
     }
@@ -259,7 +262,7 @@ function setTimer(io, roomId, time, nextPhase) {
             delete room.intervalID;
         }
 
-        nextPhase = nextPhase === 'drawPhase' ? 'themePhase' : 'drawPhase';
+        nextPhase = nextPhase === 'drawPhase' ? 'describePhase' : 'drawPhase';
         time = time === 15000 ? 30000 : 15000;
         setTimer(io, roomId, time, nextPhase);
     }, time);
