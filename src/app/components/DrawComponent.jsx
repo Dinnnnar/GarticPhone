@@ -6,18 +6,25 @@ import { useStore } from '../store/store';
 
 function DrawComponent() {
     const [theme, setTheme] = useState('');
+    const [roomId, setRoomId] = useState(null);
+    const canvasRef = useRef();
+    const isFirstRender = useRef(true);
 
     useEffect(() => {
-        const canvasRef = useRef();
-
         const query = new URLSearchParams(location.search);
-        const roomId = query.get('room');
+        const room = query.get('room');
+        setRoomId(room);
 
-        socket.emit('data-request', roomId);
+        if (room && isFirstRender.current) {
+            socket.emit('data-request', { roomId: room });
+            isFirstRender.current = false;
+        }
+    }, []);
 
+    useEffect(() => {
         const handleData = ({ data }) => {
-            console.log('data', data);
-            setTheme(theme);
+            console.log('Received data:', data);
+            setTheme(data);
         };
 
         socket.on('data', handleData);
@@ -28,8 +35,10 @@ function DrawComponent() {
     }, []);
 
     useEffect(() => {
-        new Brush(canvasRef.current, socket, roomId);
-    }, []);
+        if (roomId) {
+            new Brush(canvasRef.current, socket, roomId);
+        }
+    }, [roomId]);
 
     return (
         <div className="Draw">

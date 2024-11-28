@@ -124,7 +124,7 @@ function startGame(io, socket, roomId) {
     if (!room) return;
 
     room.currentPhase = 'themePhase';
-    room.roundCount = 0;
+    room.roundCount = -1;
 
     room.finalCount = room.members.length;
 
@@ -149,8 +149,14 @@ function handleData(io, socket, data, roomId) {
     }
 
     const member = room.members[memberIndex];
-    member.block = true;
-    socket.emit('block', { block: true });
+
+    if (room.currentPhase === 'themePhase') {
+        member.block = true;
+        socket.emit('block', { block: true });
+    } else {
+        member.block = false;
+        socket.emit('block', { block: false });
+    }
 
     if (!room.data) {
         room.data = [];
@@ -160,16 +166,18 @@ function handleData(io, socket, data, roomId) {
         room.data[room.roundCount] = [];
     }
 
-    let number;
-
-    // room.data[room.roundCount][member.number] = data;
-    // подумать
-    number = room.list[room.roundCount - 1].findIndex((item) => item === member.number);
+    const number = room.list[room.roundCount].findIndex((item) => item === member.number);
     room.data[room.roundCount][number] = data;
 
     console.log(room.data);
 
-    if (room.data[room.roundCount].length === room.finalCount + 1) {
+    const receivedDataCount = room.data[room.roundCount].filter(
+        (item) => item && typeof item === 'string'
+    ).length;
+
+    console.log('Количество отправленных данных на текущий раунд', receivedDataCount);
+
+    if (receivedDataCount === room.finalCount && room.currentPhase === 'themePhase') {
         clearInterval(room.intervalID);
         clearTimeout(room.timeoutID);
         delete room.intervalID;
@@ -179,7 +187,7 @@ function handleData(io, socket, data, roomId) {
         setTimer(io, roomId, time, nextPhase);
     }
 }
-/// ПОдумать
+
 function handleDataRequest(io, socket, roomId) {
     const room = rooms[roomId];
     if (!room) {
@@ -195,11 +203,13 @@ function handleDataRequest(io, socket, roomId) {
 
     const member = room.members[memberIndex];
 
-    number = room.list[room.roundCount - 1].findIndex((item) => item === member.number);
+    const number = room.list[room.roundCount].findIndex((item) => item === member.number);
 
     const data = room.data[room.roundCount - 1][number];
 
-    socket.emit('data', data);
+    console.log('data', data, number);
+
+    socket.emit('data', { data: data });
 }
 
 async function handleTimer(io, socket, roomId) {
@@ -220,7 +230,7 @@ function setTimer(io, roomId, time, nextPhase) {
     room.roundCount += 1;
     console.log('@@@ Current round: ', room.roundCount);
 
-    if (room.roundCount === room.finalCount + 1) {
+    if (room.roundCount === room.finalCount) {
         room.currentPhase = 'presentation';
         console.log('finally');
         io.emit('phase-updated', { phase: 'presentation' });

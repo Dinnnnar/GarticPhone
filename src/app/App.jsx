@@ -12,7 +12,15 @@ const App = () => {
     const query = new URLSearchParams(location.search);
 
     const roomId = query.get('room');
-    const { updateLobbyList, updateIsLeader, phase, updatePhase, updateBlock, block } = useStore();
+    const {
+        updateLobbyList,
+        updateIsLeader,
+        phase,
+        updatePhase,
+        updateBlock,
+        block,
+        updateRoomId,
+    } = useStore();
 
     useEffect(() => {
         if (socket.connected) {
@@ -20,6 +28,10 @@ const App = () => {
         }
 
         socket.connect();
+
+        console.log(roomId);
+
+        updateRoomId(roomId);
 
         const handleRoomUpdated = ({ members, phase }) => {
             const currentUser = members.find((member) => member.id == socket.id);

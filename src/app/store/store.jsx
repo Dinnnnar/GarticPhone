@@ -15,4 +15,6 @@ export const useStore = create((set) => ({
     updateTimer: (newTime) => set({ timer: newTime }),
     theme: '',
     updateTheme: (newTheme) => set({ theme: newTheme }),
+    roomId: '',
+    updateRoomId: (newRoomId) => set({ roomId: newRoomId }),
 }));
