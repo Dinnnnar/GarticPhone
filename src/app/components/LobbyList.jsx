@@ -1,9 +1,8 @@
 import { useStore } from '../store/store';
 
-const LeaderCard = ({ player, index }) => {
+const LeaderCard = ({ player }) => {
     return (
         <div
-            key={index}
             style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -24,10 +23,9 @@ const LeaderCard = ({ player, index }) => {
     );
 };
 
-const UserCard = ({ player, index }) => {
+const UserCard = ({ player }) => {
     return (
         <div
-            key={index}
             style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -52,12 +50,12 @@ const LobbyList = () => {
     const { lobbyList } = useStore();
     return (
         <>
-            <h1 style={{ fontSize: '24 px', textAlign: 'center' }}>Лобби</h1>
-            {lobbyList.map((player, index) =>
+            <h1 style={{ fontSize: '24px', textAlign: 'center' }}>Лобби</h1>
+            {lobbyList.map((player) =>
                 player.isLeader ? (
-                    <LeaderCard player={player} index={index} />
+                    <LeaderCard key={player.id} player={player} />
                 ) : (
-                    <UserCard player={player} index={index} />
+                    <UserCard key={player.id} player={player} />
                 )
             )}
         </>

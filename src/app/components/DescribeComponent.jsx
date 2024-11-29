@@ -17,6 +17,7 @@ function DescribeComponent() {
         setRoomId(room);
 
         if (room && isFirstRender.current) {
+            console.log('data-request');
             socket.emit('data-request', { roomId: room });
             isFirstRender.current = false;
         }
@@ -41,7 +42,7 @@ function DescribeComponent() {
     };
 
     return (
-        <div className="Theme">
+        <div className="Describe">
             <Timer />
             {data !== null && <Canvas data={data} />}
             {!block && (

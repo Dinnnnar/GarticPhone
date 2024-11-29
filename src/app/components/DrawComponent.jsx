@@ -17,6 +17,7 @@ function DrawComponent() {
 
         console.log('Render a draw component');
         if (room && isFirstRender.current) {
+            console.log('data-request');
             socket.emit('data-request', { roomId: room });
             isFirstRender.current = false;
         }
@@ -46,7 +47,7 @@ function DrawComponent() {
             <Timer />
             <h1>Draw</h1>
             <div>
-                <h1>{theme !== '' ? theme : 'Draw what you want'}</h1>
+                <h1>{theme ? theme : 'Draw what you want'}</h1>
                 <canvas
                     style={{ border: '1px solid black' }}
                     ref={canvasRef}

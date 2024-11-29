@@ -4,8 +4,6 @@ const rooms = {};
 
 export function setupSocketHandlers(io) {
     io.on('connection', (socket) => {
-        console.log('A user connected:', socket.id);
-
         socket.on('join-room', ({ roomId, username, photoUrl }) =>
             joinRoom(io, socket, roomId, username, photoUrl)
         );
@@ -26,15 +24,19 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
         `A user ${socket.id} joined the room with id '${roomId}' and username '${username}'`
     );
 
-    socket.join(roomId);
-
     if (!rooms[roomId]) {
         rooms[roomId] = { members: [], currentPhase: 'lobby', data: [] };
     }
 
-    const existingUserIndex = rooms[roomId].members.findIndex(
+    const existingUserIndex = rooms[roomId]?.members?.findIndex(
         (member) => member.username === username
     );
+
+    if (rooms[roomId].currentPhase !== 'lobby' && existingUserIndex === -1) {
+        return;
+    }
+
+    socket.join(roomId);
 
     if (rooms[roomId].members.length === 0) {
         rooms[roomId].playerCount = 0;
@@ -51,10 +53,14 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
             isLeader: rooms[roomId].members.length === 0,
             number: rooms[roomId].members.length + 1,
         });
-        rooms[roomId].playerCount += 1;
     }
 
-    console.log('Members in room:', rooms[roomId].members);
+    rooms[roomId].playerCount += 1;
+
+    console.log('Members in room:');
+    rooms[roomId].members.map((item) => {
+        console.log(item.username);
+    });
 
     socket.emit('room-joined', {
         user: username,
@@ -88,9 +94,9 @@ function disconnectUser(io, socket, reason) {
             console.log(
                 `User ${rooms[roomId].members[index].username} disconnected. Reason: ${reason}`
             );
-            console.log(rooms[roomId].playerCount);
             rooms[roomId].playerCount -= 1;
             if (rooms[roomId].currentPhase === 'lobby' || rooms[roomId].members.length === 1) {
+                // добавить смену лидера во врекмя финальной фазы
                 const [removedMember] = rooms[roomId].members.splice(index, 1);
                 if (
                     rooms[roomId].members.length > 0 &&
@@ -101,15 +107,16 @@ function disconnectUser(io, socket, reason) {
             }
             if (rooms[roomId].playerCount === 0) {
                 clearInterval(rooms[roomId].intervalID);
+                clearTimeout(rooms[roomId].timeoutID);
+                console.log('Delete a room');
                 delete rooms[roomId];
-            } else {
+            } else if (rooms[roomId].currentPhase === 'lobby') {
                 io.to(roomId).emit('room-updated', {
                     members: rooms[roomId].members.map((member) => ({
                         id: member.id,
                         username: member.username,
                         photoUrl: member.photoUrl,
                         isLeader: member.isLeader,
-                        block: member?.block,
                     })),
                     phase: rooms[roomId].currentPhase,
                 });
@@ -123,14 +130,12 @@ function startGame(io, socket, roomId) {
     const room = rooms[roomId];
     if (!room) return;
 
-    room.currentPhase = 'themePhase';
     room.roundCount = -1;
 
     room.finalCount = room.members.length;
 
     const List = new Latin(room.finalCount);
     room.list = List;
-    console.log(List);
 
     setTimer(io, roomId, 15000, 'themePhase');
 }
@@ -169,13 +174,11 @@ function handleData(io, socket, data, roomId) {
     const number = room.list[room.roundCount].findIndex((item) => item === member.number);
     room.data[room.roundCount][number] = data;
 
-    console.log(room.data);
+    if (room.currentPhase !== 'drawPhase') console.log(room.data[room.roundCount]);
 
     const receivedDataCount = room.data[room.roundCount].filter(
         (item) => item && typeof item === 'string'
     ).length;
-
-    console.log('Количество отправленных данных на текущий раунд', receivedDataCount);
 
     if (
         (receivedDataCount === room.finalCount && room.currentPhase === 'describePhase') ||
@@ -187,6 +190,7 @@ function handleData(io, socket, data, roomId) {
         delete room.timeoutID;
         const nextPhase = typeof data === 'string' ? 'drawPhase' : 'describePhase';
         const time = nextPhase === 'drawPhase' ? 30000 : 15000;
+        console.log('Next phase', nextPhase, time);
         setTimer(io, roomId, time, nextPhase);
     }
 }
@@ -210,8 +214,6 @@ function handleDataRequest(io, socket, roomId) {
 
     const data = room.data[room.roundCount - 1][number];
 
-    console.log('data', data, number);
-
     socket.emit('data', { data: data });
 }
 
@@ -231,16 +233,19 @@ function setTimer(io, roomId, time, nextPhase) {
     if (!room) return;
 
     room.roundCount += 1;
+    console.log('\n');
     console.log('@@@ Current round: ', room.roundCount);
 
     if (room.roundCount === room.finalCount) {
         room.currentPhase = 'presentation';
-        console.log('finally');
+        console.log('Final phase');
         io.emit('phase-updated', { phase: 'presentation' });
         return;
     }
 
-    io.emit('phase-updated', { phase: nextPhase });
+    room.currentPhase = nextPhase;
+
+    io.emit('phase-updated', { phase: room.currentPhase });
 
     const endTime = Math.floor((Date.now() + time) / 1000);
     room.timer = time / 1000;
@@ -256,13 +261,12 @@ function setTimer(io, roomId, time, nextPhase) {
     }, 1000);
 
     room.timeoutID = setTimeout(() => {
-        room.currentPhase = nextPhase;
         if (room.intervalID) {
             clearInterval(room.intervalID);
             delete room.intervalID;
         }
 
-        nextPhase = nextPhase === 'drawPhase' ? 'describePhase' : 'drawPhase';
+        nextPhase = room.currentPhase === 'drawPhase' ? 'describePhase' : 'drawPhase';
         time = time === 15000 ? 30000 : 15000;
         setTimer(io, roomId, time, nextPhase);
     }, time);
