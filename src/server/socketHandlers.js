@@ -250,6 +250,9 @@ async function handleUserDataRequest(io, socket, data, roomId) {
         const userIndex = room.list[i][number];
         const member = room.members.find((member) => member.number == userIndex);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        if (i === 0) {
+            io.emit('selectedUser', { username: member.username });
+        }
         io.emit('userContentArray', { data: content, member: member });
     }
 }

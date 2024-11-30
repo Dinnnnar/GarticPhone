@@ -24,7 +24,6 @@ function DrawComponent() {
     return (
         <div className="Draw">
             <Timer />
-            <h1>Draw</h1>
             <div>
                 <h1>{data ? data : 'Draw what you want'}</h1>
                 <canvas

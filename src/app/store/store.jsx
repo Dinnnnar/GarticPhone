@@ -19,4 +19,6 @@ export const useStore = create((set) => ({
     updateRoomId: (newRoomId) => set({ roomId: newRoomId }),
     data: null,
     updateData: (newData) => set({ data: newData }),
+    // selectedUser: '',
+    // updateSelectedUser: (newUser) => set({ selectedUser: newUser }),
 }));

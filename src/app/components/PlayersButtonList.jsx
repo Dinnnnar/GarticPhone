@@ -29,7 +29,7 @@ const UserCard = ({ player }) => {
                 cursor: 'pointer',
                 transition: 'background-color 0.2s, transform 0.2s',
                 width: 'fit-content',
-                margin: '1px',
+                margin: '10px 3px',
             }}
             onMouseEnter={(e) => (e.target.style.backgroundColor = '#f9f9f9')}
             onMouseLeave={(e) => (e.target.style.backgroundColor = '#ffffff')}
@@ -65,8 +65,10 @@ const PlayersButtonList = () => {
         <div
             style={{
                 display: 'flex',
+                justifyContent: 'center',
                 alignItems: 'center',
                 padding: '12px',
+                gap: '8px',
             }}
         >
             {lobbyList.map((player) => (

@@ -1,58 +1,73 @@
 import React, { useEffect, useRef } from 'react';
 
-function Canvas({ data, width = 300, height = 350 }) {
+function Canvas({ data, width = 300, height = 350, duration = 2000 }) {
     const canvasRef = useRef();
 
     useEffect(() => {
         if (Array.isArray(data) && data.length > 0) {
-            draw(data, canvasRef.current);
+            draw(data, canvasRef.current, duration);
         }
-    }, [data]);
+    }, [data, duration]);
 
-    function draw(actions, canvas) {
+    function draw(actions, canvas, duration) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const totalCommands = actions.length;
-        const interval = Math.min(1, Math.floor(30 / totalCommands));
+        const startTime = performance.now();
+        const timePerCommand = duration / totalCommands;
 
-        let index = 0;
+        function render(currentTime) {
+            const elapsedTime = currentTime - startTime;
+            const commandsToRender = Math.min(
+                Math.floor(elapsedTime / timePerCommand),
+                totalCommands
+            );
 
-        function render() {
-            if (index >= totalCommands) return;
-
-            const [command, ...args] = actions[index];
-            if (command === 'lineTo') {
-                ctx.lineTo(...args);
-            } else if (command === 'moveTo') {
-                ctx.moveTo(...args);
-            } else if (command === 'beginPath') {
-                ctx.beginPath();
-            } else if (command === 'stroke') {
-                ctx.stroke();
-            } else {
-                console.warn('Unknown drawing command:', command);
+            for (let i = 0; i < commandsToRender; i++) {
+                if (!actions[i].executed) {
+                    const [command, ...args] = actions[i];
+                    switch (command) {
+                        case 'lineTo':
+                            ctx.lineTo(...args);
+                            break;
+                        case 'moveTo':
+                            ctx.moveTo(...args);
+                            break;
+                        case 'beginPath':
+                            ctx.beginPath();
+                            break;
+                        case 'stroke':
+                            ctx.stroke();
+                            break;
+                        default:
+                            console.warn('Неизвестная команда рисования:', command);
+                            break;
+                    }
+                    actions[i].executed = true;
+                }
             }
 
-            index++;
-            setTimeout(render, interval);
+            if (commandsToRender < totalCommands) {
+                requestAnimationFrame(render);
+            }
         }
 
-        render();
+        requestAnimationFrame(render);
     }
 
     return (
         <div>
             <canvas
                 style={{
-                    border: '2px solid #ddd', // Граница холста
-                    borderRadius: '8px', // Закругленные углы
-                    backgroundColor: '#fff', // Белый фон
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Тень для объёмности
-                    display: 'block', // Устраняет лишние отступы
-                    margin: '16px auto', // Центрирование с отступами
-                    maxWidth: '100%', // Адаптация для небольших экранов
-                    height: 'auto', // Сохранение пропорций
+                    border: '2px solid #ddd',
+                    borderRadius: '8px',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    display: 'block',
+                    margin: '16px auto',
+                    maxWidth: '100%',
+                    height: 'auto',
                 }}
                 width={width}
                 height={height}

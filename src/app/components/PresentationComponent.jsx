@@ -4,7 +4,7 @@ import { useStore } from '../store/store';
 import Canvas from './Canvas';
 import PlayersButtonList from './PlayersButtonList';
 
-const UserCard = ({ player, children }) => {
+const Card = ({ player, isSelected = false, children }) => {
     return (
         <div
             style={{
@@ -12,10 +12,13 @@ const UserCard = ({ player, children }) => {
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 padding: '12px',
-                backgroundColor: '#f9f9f9',
+                backgroundColor: isSelected ? '#e0f7fa' : '#f9f9f9',
                 borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                boxShadow: isSelected
+                    ? '0 4px 8px rgba(0, 0, 0, 0.2)'
+                    : '0 2px 4px rgba(0, 0, 0, 0.1)',
                 marginBottom: '12px',
+                border: isSelected ? '2px solid #00796b' : 'none',
                 wordWrap: 'break-word',
             }}
         >
@@ -28,23 +31,66 @@ const UserCard = ({ player, children }) => {
                         height: '40px',
                         borderRadius: '50%',
                         marginRight: '8px',
+                        border: isSelected ? '2px solid #00796b' : 'none',
                     }}
                 />
-                <span style={{ fontWeight: 'bold', color: '#333' }}>{player.username}</span>
+                <span
+                    style={{
+                        fontWeight: 'bold',
+                        color: isSelected ? '#00796b' : '#333',
+                    }}
+                >
+                    {player.username}
+                </span>
             </div>
-            <div
-                style={{
-                    backgroundColor: '#ffffff',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    color: '#555',
-                    fontSize: '14px',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                    alignSelf: 'stretch',
-                }}
-            >
-                {children}
-            </div>
+            {children && (
+                <div
+                    style={{
+                        backgroundColor: '#ffffff',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        color: '#555',
+                        fontSize: '14px',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        alignSelf: 'stretch',
+                    }}
+                >
+                    {children}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const PlayersList = () => {
+    const { lobbyList } = useStore();
+    const [username, setUsername] = useState('');
+
+    useEffect(() => {
+        const handleUsername = ({ username }) => {
+            setUsername(username);
+        };
+
+        socket.on('selectedUser', handleUsername);
+
+        return () => {
+            socket.off('selectedUser', handleUsername);
+        };
+    }, []);
+
+    return (
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '12px',
+                gap: '8px',
+            }}
+        >
+            {lobbyList.map((player) => (
+                <Card key={player.id} player={player} isSelected={username === player.username} />
+            ))}
         </div>
     );
 };
@@ -55,29 +101,17 @@ function PresentationComponent() {
 
     useEffect(() => {
         const handleData = ({ data, member }) => {
-            console.log(data);
-            console.log(data == null);
             setData((prevData) => [
                 ...prevData,
-                typeof data === 'string' ? (
-                    <>
-                        <UserCard key={member.id} player={member}>
-                            <h2>{data}</h2>
-                        </UserCard>
-                    </>
-                ) : data == null ? (
-                    <>
-                        <UserCard key={member.id} player={member}>
-                            <h2>No comments</h2>
-                        </UserCard>
-                    </>
-                ) : (
-                    <>
-                        <UserCard key={member.id} player={member}>
-                            <Canvas data={data} />
-                        </UserCard>
-                    </>
-                ),
+                <Card key={member.id} player={member}>
+                    {typeof data === 'string' ? (
+                        <h2>{data}</h2>
+                    ) : data == null ? (
+                        <h2>No comments</h2>
+                    ) : (
+                        <Canvas data={data} />
+                    )}
+                </Card>,
             ]);
         };
 
@@ -96,8 +130,8 @@ function PresentationComponent() {
 
     return (
         <div className="Presentation">
-            <h1>Presentation</h1>
             {isLeader && <PlayersButtonList />}
+            {!isLeader && <PlayersList />}
             {data && data}
         </div>
     );
