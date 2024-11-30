@@ -36,18 +36,23 @@ const Card = ({ player, isSelected = false, children }) => {
                         width: '40px',
                         height: '40px',
                         borderRadius: '50%',
-                        marginRight: '8px',
                         border: isSelected ? '2px solid #00796b' : 'none',
                     }}
                 />
-                <span
-                    style={{
-                        fontWeight: 'bold',
-                        color: isSelected ? '#00796b' : theme === 'light-theme' ? 'black' : 'white',
-                    }}
-                >
-                    {player.username}
-                </span>
+                {children && (
+                    <span
+                        style={{
+                            fontWeight: 'bold',
+                            color: isSelected
+                                ? '#00796b'
+                                : theme === 'light-theme'
+                                ? 'black'
+                                : 'white',
+                        }}
+                    >
+                        {player.username}
+                    </span>
+                )}
             </div>
             {children && (
                 <div
@@ -109,6 +114,7 @@ function PresentationComponent() {
 
     useEffect(() => {
         const handleData = ({ data, member }) => {
+            console.log(data);
             setData((prevData) => [
                 ...prevData,
                 <Card key={member.id} player={member}>

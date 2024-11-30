@@ -7,7 +7,6 @@ const UserCard = ({ player }) => {
     const query = new URLSearchParams(location.search);
     const roomId = query.get('room');
     const { theme } = useStore();
-    console.log(theme);
 
     const handleUserClick = (username) => {
         socket.emit('user-data-request', {
@@ -65,18 +64,8 @@ const UserCard = ({ player }) => {
                     width: '40px',
                     height: '40px',
                     borderRadius: '50%',
-                    marginRight: '12px',
                 }}
             />
-            <span
-                style={{
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    color: theme === 'light-theme' ? 'black' : 'white',
-                }}
-            >
-                {player.username}
-            </span>
         </button>
     );
 };
