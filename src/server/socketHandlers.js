@@ -247,8 +247,10 @@ async function handleUserDataRequest(io, socket, data, roomId) {
 
     for (let i = 0; i < room.finalCount; i++) {
         const content = room.data[i][number];
+        const userIndex = room.list[i][number];
+        const member = room.members.find((member) => member.number == userIndex);
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        io.emit('userContentArray', { data: content });
+        io.emit('userContentArray', { data: content, member: member });
     }
 }
 

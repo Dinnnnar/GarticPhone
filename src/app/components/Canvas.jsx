@@ -44,7 +44,16 @@ function Canvas({ data, width = 300, height = 350 }) {
     return (
         <div>
             <canvas
-                style={{ border: '1px solid black' }}
+                style={{
+                    border: '2px solid #ddd', // Граница холста
+                    borderRadius: '8px', // Закругленные углы
+                    backgroundColor: '#fff', // Белый фон
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Тень для объёмности
+                    display: 'block', // Устраняет лишние отступы
+                    margin: '16px auto', // Центрирование с отступами
+                    maxWidth: '100%', // Адаптация для небольших экранов
+                    height: 'auto', // Сохранение пропорций
+                }}
                 width={width}
                 height={height}
                 ref={canvasRef}

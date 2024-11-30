@@ -4,54 +4,80 @@ import { useStore } from '../store/store';
 import Canvas from './Canvas';
 import PlayersButtonList from './PlayersButtonList';
 
+const UserCard = ({ player, children }) => {
+    return (
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                padding: '12px',
+                backgroundColor: '#f9f9f9',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                marginBottom: '12px',
+                wordWrap: 'break-word',
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                <img
+                    src={player.photoUrl || 'https://via.placeholder.com/50'}
+                    alt={player.username}
+                    style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        marginRight: '8px',
+                    }}
+                />
+                <span style={{ fontWeight: 'bold', color: '#333' }}>{player.username}</span>
+            </div>
+            <div
+                style={{
+                    backgroundColor: '#ffffff',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    color: '#555',
+                    fontSize: '14px',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                    alignSelf: 'stretch',
+                }}
+            >
+                {children}
+            </div>
+        </div>
+    );
+};
+
 function PresentationComponent() {
     const [data, setData] = useState([]);
     const { isLeader } = useStore();
 
-    // useEffect(() => {
-    //     const handleData = ({ data }) => {
-    //         setData(null);
-    //         // let index = 0;
-
-    //         // const interval = setInterval(() => {
-    //         //     if (index < data.length) {
-    //         //         const item = data[index];
-    //         //         const uniqueKey = typeof item === 'string' ? item : `canvas-${index}`;
-    //         //         console.log(item);
-
-    //         //         if (typeof item === 'string') {
-    //         //             content.push(<h2 key={uniqueKey}>{item}</h2>);
-    //         //         } else if (item === null) {
-    //         //             content.push(<h2>Без комментариев</h2>);
-    //         //         } else {
-    //         //             content.push(<Canvas key={uniqueKey} data={item} />);
-    //         //         }
-
-    //         //         setData([...content]);
-    //         //         index++;
-    //         //     } else {
-    //         //         clearInterval(interval);
-    //         //     }
-    //         // }, 1000);
-    //         console.log(data);
-    //         let content;
-    //         if (typeof data === 'string') {
-    //             content = <h2>{data}</h2>;
-    //         } else if (data === null) {
-    //             content = <h2>Без комментариев</h2>;
-    //         } else {
-    //             content = <Canvas data={data} />;
-    //         }
-    //         // const content = data.map((item, index) => {
-
-    //         // });
-    //         setData(content);
-    //     };
     useEffect(() => {
-        const handleData = ({ data }) => {
+        const handleData = ({ data, member }) => {
+            console.log(data);
+            console.log(data == null);
             setData((prevData) => [
                 ...prevData,
-                typeof data === 'string' ? <h2>{data}</h2> : <Canvas data={data} />,
+                typeof data === 'string' ? (
+                    <>
+                        <UserCard key={member.id} player={member}>
+                            <h2>{data}</h2>
+                        </UserCard>
+                    </>
+                ) : data == null ? (
+                    <>
+                        <UserCard key={member.id} player={member}>
+                            <h2>No comments</h2>
+                        </UserCard>
+                    </>
+                ) : (
+                    <>
+                        <UserCard key={member.id} player={member}>
+                            <Canvas data={data} />
+                        </UserCard>
+                    </>
+                ),
             ]);
         };
 

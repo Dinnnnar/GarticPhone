@@ -28,10 +28,19 @@ function DrawComponent() {
             <div>
                 <h1>{data ? data : 'Draw what you want'}</h1>
                 <canvas
-                    style={{ border: '1px solid black' }}
-                    ref={canvasRef}
+                    style={{
+                        border: '2px solid #ddd',
+                        borderRadius: '8px',
+                        backgroundColor: '#fff',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        display: 'block',
+                        margin: '16px auto',
+                        maxWidth: '100%',
+                        height: 'auto',
+                    }}
                     width={300}
                     height={350}
+                    ref={canvasRef}
                 />
             </div>
         </div>
