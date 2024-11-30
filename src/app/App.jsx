@@ -8,6 +8,7 @@ import UserLanding from './components/UserLanding';
 import ThemeComponent from './components/ThemeComponent';
 import DrawComponent from './components/DrawComponent';
 import DescribeComponent from './components/DescribeComponent';
+import PresentationComponent from './components/PresentationComponent';
 
 const App = () => {
     const query = new URLSearchParams(location.search);
@@ -21,6 +22,7 @@ const App = () => {
         updateBlock,
         block,
         updateRoomId,
+        updateData,
     } = useStore();
 
     useEffect(() => {
@@ -29,32 +31,60 @@ const App = () => {
         }
 
         socket.connect();
-
-        console.log(roomId);
-
         updateRoomId(roomId);
 
-        const handleRoomUpdated = ({ members, phase }) => {
+        const handleRoomUpdated = ({ members, newPhase }) => {
+            console.log('room updated');
             const currentUser = members.find((member) => member.id == socket.id);
             const isLeader = currentUser?.isLeader;
             updateIsLeader(isLeader);
             updateLobbyList(members);
-            updatePhase(phase);
+
+            if (newPhase != phase) {
+                updatePhase(newPhase);
+            }
+
             if (currentUser?.block) updateBlock(currentUser?.block);
         };
 
-        const handlePhaseUpdated = ({ phase }) => {
-            updatePhase(phase);
+        const handleRoomJoined = ({ members, newPhase }) => {
+            if (newPhase === 'drawPhase' || newPhase === 'describePhase') {
+                console.log('request');
+                socket.emit('data-request', { roomId: roomId });
+            }
+
+            console.log('room joined');
+            const currentUser = members.find((member) => member.id == socket.id);
+            const isLeader = currentUser?.isLeader;
+            updateIsLeader(isLeader);
+            updateLobbyList(members);
+
+            if (currentUser?.block) updateBlock(currentUser?.block);
+        };
+
+        const handlePhaseUpdated = ({ newPhase }) => {
+            if (newPhase === 'drawPhase' || newPhase === 'describePhase') {
+                console.log('request');
+                socket.emit('data-request', { roomId: roomId });
+            }
+            console.log('phase-updated');
+            updatePhase(newPhase);
         };
 
         const handleBlock = ({ block }) => {
             updateBlock(block);
         };
 
-        socket.on('room-joined', handleRoomUpdated);
+        const handleData = ({ data }) => {
+            console.log('Received data:', data);
+            updateData(data);
+        };
+
+        socket.on('room-joined', handleRoomJoined);
         socket.on('block', handleBlock);
         socket.on('room-updated', handleRoomUpdated);
         socket.on('phase-updated', handlePhaseUpdated);
+        socket.on('data', handleData);
 
         const tg = window.Telegram.WebApp;
 
@@ -80,14 +110,18 @@ const App = () => {
         }
 
         return () => {
-            socket.off('room-joined', handleRoomUpdated);
+            socket.off('room-joined', handleRoomJoined);
             socket.off('room-updated', handleRoomUpdated);
+            socket.off('block', handleBlock);
+            socket.off('phase-updated', handlePhaseUpdated);
+            socket.off('data', handleData);
             socket.disconnect();
         };
     }, []);
 
     return (
         <>
+            {phase === 'lobby' && <h1 style={{ fontSize: '24px', textAlign: 'center' }}>Лобби</h1>}
             {phase === 'lobby' && <LobbyList />}
             {phase === 'lobby' && <StartButton />}
 
@@ -98,7 +132,7 @@ const App = () => {
 
             {phase === 'drawPhase' && <DrawComponent />}
 
-            {phase === 'presentation' && <h1>Final</h1>}
+            {phase === 'presentation' && <PresentationComponent />}
         </>
     );
 };

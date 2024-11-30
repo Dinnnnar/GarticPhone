@@ -12,7 +12,6 @@ function Timer() {
         socket.emit('timer', roomId);
 
         const handleTimerUpdate = ({ timer }) => {
-            console.log('timer update', timer);
             setTime(timer);
             setTimer(timer);
         };

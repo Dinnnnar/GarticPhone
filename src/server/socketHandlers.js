@@ -11,6 +11,9 @@ export function setupSocketHandlers(io) {
         socket.on('start-game', (roomId) => startGame(io, socket, roomId));
         socket.on('data', ({ data, roomId }) => handleData(io, socket, data, roomId));
         socket.on('data-request', ({ roomId }) => handleDataRequest(io, socket, roomId));
+        socket.on('user-data-request', ({ roomId, data }) =>
+            handleUserDataRequest(io, socket, data, roomId)
+        );
         socket.on('timer', (roomId) => handleTimer(io, socket, roomId));
     });
 }
@@ -20,9 +23,9 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
         return;
     }
 
-    console.log(
-        `A user ${socket.id} joined the room with id '${roomId}' and username '${username}'`
-    );
+    // console.log(
+    //     `A user ${socket.id} joined the room with id '${roomId}' and username '${username}'`
+    // );
 
     if (!rooms[roomId]) {
         rooms[roomId] = { members: [], currentPhase: 'lobby', data: [] };
@@ -57,10 +60,12 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
 
     rooms[roomId].playerCount += 1;
 
+    console.log('-'.repeat(10));
     console.log('Members in room:');
     rooms[roomId].members.map((item) => {
         console.log(item.username);
     });
+    console.log('-'.repeat(10));
 
     socket.emit('room-joined', {
         user: username,
@@ -72,7 +77,7 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
             isLeader: member.isLeader,
             block: member?.block,
         })),
-        phase: rooms[roomId].currentPhase,
+        newPhase: rooms[roomId].currentPhase,
     });
 
     io.to(roomId).emit('room-updated', {
@@ -83,7 +88,7 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
             isLeader: member.isLeader,
             block: member?.block,
         })),
-        phase: rooms[roomId].currentPhase,
+        newPhase: rooms[roomId].currentPhase,
     });
 }
 
@@ -117,8 +122,9 @@ function disconnectUser(io, socket, reason) {
                         username: member.username,
                         photoUrl: member.photoUrl,
                         isLeader: member.isLeader,
+                        block: member?.block,
                     })),
-                    phase: rooms[roomId].currentPhase,
+                    newPhase: rooms[roomId].currentPhase,
                 });
             }
             break;
@@ -136,6 +142,10 @@ function startGame(io, socket, roomId) {
 
     const List = new Latin(room.finalCount);
     room.list = List;
+    room.data = Array.from({ length: room.finalCount }, () => Array(room.finalCount).fill(null));
+    console.log(room.data);
+
+    console.log('\n');
 
     setTimer(io, roomId, 15000, 'themePhase');
 }
@@ -146,6 +156,8 @@ function handleData(io, socket, data, roomId) {
         console.warn(`Room with ID ${roomId} not found.`);
         return;
     }
+
+    if (room.currentPhase === 'presentation') return;
 
     const memberIndex = room.members?.findIndex((member) => member.id === socket.id);
     if (memberIndex === -1) {
@@ -190,7 +202,6 @@ function handleData(io, socket, data, roomId) {
         delete room.timeoutID;
         const nextPhase = typeof data === 'string' ? 'drawPhase' : 'describePhase';
         const time = nextPhase === 'drawPhase' ? 30000 : 15000;
-        console.log('Next phase', nextPhase, time);
         setTimer(io, roomId, time, nextPhase);
     }
 }
@@ -208,6 +219,8 @@ function handleDataRequest(io, socket, roomId) {
         return;
     }
 
+    // console.log(`Socket request from ${socket.id}`);
+
     const member = room.members[memberIndex];
 
     const number = room.list[room.roundCount].findIndex((item) => item === member.number);
@@ -215,6 +228,26 @@ function handleDataRequest(io, socket, roomId) {
     const data = room.data[room.roundCount - 1][number];
 
     socket.emit('data', { data: data });
+}
+
+function handleUserDataRequest(io, socket, data, roomId) {
+    const room = rooms[roomId];
+    const userIndex = room.members.findIndex((member) => member.username === data);
+
+    const user = room.members[userIndex];
+
+    const number = room.list[0].findIndex((item) => item === user.number);
+
+    const dataArray = [];
+
+    for (let i = 0; i < room.finalCount; i++) {
+        let content = room.data[i][number];
+        dataArray.push(content);
+    }
+
+    console.log(`${data}:`, dataArray);
+
+    io.emit('userContentArray', { data: dataArray });
 }
 
 async function handleTimer(io, socket, roomId) {
@@ -233,19 +266,20 @@ function setTimer(io, roomId, time, nextPhase) {
     if (!room) return;
 
     room.roundCount += 1;
-    console.log('\n');
-    console.log('@@@ Current round: ', room.roundCount);
+    console.log('-'.repeat(10));
 
     if (room.roundCount === room.finalCount) {
         room.currentPhase = 'presentation';
-        console.log('Final phase');
-        io.emit('phase-updated', { phase: 'presentation' });
+        console.log(`Current round: ${room.roundCount} - ${room.currentPhase}`);
+        io.emit('phase-updated', { newPhase: 'presentation' });
         return;
     }
 
     room.currentPhase = nextPhase;
 
-    io.emit('phase-updated', { phase: room.currentPhase });
+    console.log(`Current round: ${room.roundCount} - ${room.currentPhase}`);
+
+    io.emit('phase-updated', { newPhase: room.currentPhase });
 
     const endTime = Math.floor((Date.now() + time) / 1000);
     room.timer = time / 1000;
@@ -268,6 +302,7 @@ function setTimer(io, roomId, time, nextPhase) {
 
         nextPhase = room.currentPhase === 'drawPhase' ? 'describePhase' : 'drawPhase';
         time = time === 15000 ? 30000 : 15000;
+        console.log('-'.repeat(10));
         setTimer(io, roomId, time, nextPhase);
     }, time);
 }

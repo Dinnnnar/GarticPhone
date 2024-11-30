@@ -1,38 +1,56 @@
 import React, { useEffect, useRef } from 'react';
 
-function Canvas({ data }) {
+function Canvas({ data, width = 300, height = 350 }) {
     const canvasRef = useRef();
 
     useEffect(() => {
-        if (data !== 'null') {
+        if (Array.isArray(data) && data.length > 0) {
             draw(data, canvasRef.current);
         }
     }, [data]);
 
     function draw(actions, canvas) {
         const ctx = canvas.getContext('2d');
-        const actionsArray = JSON.parse(actions);
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Очистка холста
 
-        for (let i = 0; i < actionsArray.length; ++i) {
-            setTimeout(() => {
-                if (actionsArray[i][0] === 'lineTo') {
-                    ctx.lineTo(actionsArray[i][1], actionsArray[i][2]);
-                } else if (actionsArray[i][0] === 'moveTo') {
-                    ctx.moveTo(actionsArray[i][1], actionsArray[i][2]);
-                } else if (actionsArray[i][0] === 'beginPath') {
-                    ctx.beginPath();
-                } else if (actionsArray[i][0] === 'stroke') {
-                    ctx.stroke();
-                }
-            }, i * 3);
+        const totalCommands = actions.length;
+        const interval = Math.max(1, Math.floor(300 / totalCommands)); // Регулируем задержку
+
+        let index = 0;
+
+        function render() {
+            if (index >= totalCommands) return;
+
+            const [command, ...args] = actions[index];
+            if (command === 'lineTo') {
+                ctx.lineTo(...args);
+            } else if (command === 'moveTo') {
+                ctx.moveTo(...args);
+            } else if (command === 'beginPath') {
+                ctx.beginPath();
+            } else if (command === 'stroke') {
+                ctx.stroke();
+            } else {
+                console.warn('Unknown drawing command:', command);
+            }
+
+            index++;
+            setTimeout(render, interval); // Задержка
         }
+
+        render();
     }
 
     return (
         <div>
-            <canvas style={{ border: '1px solid black' }} ref={canvasRef} />
+            <canvas
+                style={{ border: '1px solid black' }}
+                width={width}
+                height={height}
+                ref={canvasRef}
+            />
         </div>
     );
 }
 
-export default Canvas;
+export default React.memo(Canvas);

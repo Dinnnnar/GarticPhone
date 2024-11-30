@@ -50,7 +50,6 @@ const LobbyList = () => {
     const { lobbyList } = useStore();
     return (
         <>
-            <h1 style={{ fontSize: '24px', textAlign: 'center' }}>Лобби</h1>
             {lobbyList.map((player) =>
                 player.isLeader ? (
                     <LeaderCard key={player.id} player={player} />
