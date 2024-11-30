@@ -23,10 +23,6 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
         return;
     }
 
-    // console.log(
-    //     `A user ${socket.id} joined the room with id '${roomId}' and username '${username}'`
-    // );
-
     if (!rooms[roomId]) {
         rooms[roomId] = { members: [], currentPhase: 'lobby', data: [] };
     }
@@ -36,6 +32,7 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
     );
 
     if (rooms[roomId].currentPhase !== 'lobby' && existingUserIndex === -1) {
+        socket.emit('phase-updated', { newPhase: 'noconnected' });
         return;
     }
 
@@ -143,7 +140,14 @@ function startGame(io, socket, roomId) {
     const List = new Latin(room.finalCount);
     room.list = List;
     room.data = Array.from({ length: room.finalCount }, () => Array(room.finalCount).fill(null));
-    console.log(room.data);
+
+    room.members.map((member) => ({
+        id: member.id,
+        username: member.username,
+        photoUrl: member.photoUrl,
+        isLeader: member.isLeader,
+        block: false,
+    }));
 
     console.log('\n');
 
@@ -206,7 +210,7 @@ function handleData(io, socket, data, roomId) {
     }
 }
 
-function handleDataRequest(io, socket, roomId) {
+async function handleDataRequest(io, socket, roomId) {
     const room = rooms[roomId];
     if (!room) {
         console.warn(`Room with ID ${roomId} not found.`);
@@ -227,27 +231,25 @@ function handleDataRequest(io, socket, roomId) {
 
     const data = room.data[room.roundCount - 1][number];
 
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     socket.emit('data', { data: data });
 }
 
-function handleUserDataRequest(io, socket, data, roomId) {
+async function handleUserDataRequest(io, socket, data, roomId) {
     const room = rooms[roomId];
     const userIndex = room.members.findIndex((member) => member.username === data);
 
     const user = room.members[userIndex];
 
     const number = room.list[0].findIndex((item) => item === user.number);
-
-    const dataArray = [];
+    io.emit('clear');
 
     for (let i = 0; i < room.finalCount; i++) {
-        let content = room.data[i][number];
-        dataArray.push(content);
+        const content = room.data[i][number];
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        io.emit('userContentArray', { data: content });
     }
-
-    console.log(`${data}:`, dataArray);
-
-    io.emit('userContentArray', { data: dataArray });
 }
 
 async function handleTimer(io, socket, roomId) {
@@ -255,7 +257,7 @@ async function handleTimer(io, socket, roomId) {
     if (!room) return;
 
     while (!room?.timer) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     socket.emit('timer-updated', { timer: room.timer });

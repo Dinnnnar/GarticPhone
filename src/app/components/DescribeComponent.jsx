@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { socket } from '../lib/socket';
 import { useStore } from '../store/store';
 import Timer from './Timer';
@@ -44,7 +44,7 @@ function DescribeComponent() {
     return (
         <div className="Describe">
             <Timer />
-            {data !== null && <Canvas data={data} />}
+            {data !== null && !block && <Canvas data={data} />}
             {!block && (
                 <>
                     <h2>Напишите тему</h2>

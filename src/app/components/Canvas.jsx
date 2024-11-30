@@ -11,10 +11,10 @@ function Canvas({ data, width = 300, height = 350 }) {
 
     function draw(actions, canvas) {
         const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Очистка холста
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const totalCommands = actions.length;
-        const interval = Math.max(1, Math.floor(300 / totalCommands)); // Регулируем задержку
+        const interval = Math.min(1, Math.floor(30 / totalCommands));
 
         let index = 0;
 
@@ -35,7 +35,7 @@ function Canvas({ data, width = 300, height = 350 }) {
             }
 
             index++;
-            setTimeout(render, interval); // Задержка
+            setTimeout(render, interval);
         }
 
         render();

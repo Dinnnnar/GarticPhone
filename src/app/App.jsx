@@ -133,6 +133,25 @@ const App = () => {
             {phase === 'drawPhase' && <DrawComponent />}
 
             {phase === 'presentation' && <PresentationComponent />}
+
+            {phase === 'noconnected' && (
+                <>
+                    <h2>Игра уже началась</h2>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '12px',
+                        }}
+                    >
+                        <img
+                            src="https://media1.tenor.com/m/rLtoDKjOtukAAAAd/al-bundy-married-with-children.gif"
+                            alt=""
+                            width={350}
+                        ></img>
+                    </div>
+                </>
+            )}
         </>
     );
 };
