@@ -125,7 +125,7 @@ const App = () => {
             {phase === 'lobby' && <LobbyList />}
             {phase === 'lobby' && <StartButton />}
 
-            {phase === 'themePhase' && <UserLanding />}
+            {/* {phase === 'themePhase' && <UserLanding />} */}
             {phase === 'themePhase' && <ThemeComponent />}
 
             {phase === 'describePhase' && <DescribeComponent />}
