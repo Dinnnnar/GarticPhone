@@ -4,7 +4,7 @@ import { useStore } from '../store/store';
 import Timer from './Timer';
 
 function ThemeComponent() {
-    const { block } = useStore();
+    const { block, theme } = useStore();
     const query = new URLSearchParams(location.search);
     const roomId = query.get('room');
 
@@ -30,10 +30,28 @@ function ThemeComponent() {
             >
                 {!block && (
                     <>
-                        <h2>Напишите тему</h2>
+                        <h2 style={{ color: theme === 'dark-theme' ? 'white' : 'black' }}>
+                            Напишите тему
+                        </h2>
                         <input id="initialtext" type="text" maxLength="50" />
                         <br />
-                        <button id="submitThemeButton" onClick={handleClick}>
+                        <button
+                            style={{
+                                backgroundColor: theme === 'light-theme' ? '#333' : '#40a7e3',
+                                color: '#fff',
+                                border: 'none',
+                                padding: '12px 24px',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                boxShadow:
+                                    theme === 'light-theme'
+                                        ? '0 2px 4px rgba(0, 0, 0, 0.5)'
+                                        : '0 2px 4px rgba(0, 0, 0, 0.2)',
+                                transition: 'background-color 0.3s, transform 0.3s',
+                            }}
+                            id="submitThemeButton"
+                            onClick={handleClick}
+                        >
                             Отправить
                         </button>
                     </>

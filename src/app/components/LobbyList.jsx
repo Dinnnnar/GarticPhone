@@ -1,13 +1,15 @@
 import { useStore } from '../store/store';
 
 const LeaderCard = ({ player }) => {
+    const { theme } = useStore();
     return (
         <div
             style={{
                 display: 'flex',
                 alignItems: 'center',
                 padding: '12px',
-                backgroundColor: 'rgba(255, 255, 0, 0.4)',
+                backgroundColor: theme !== 'dark-theme' ? 'rgba(255, 255, 0, 0.4)' : '#40a7e3',
+                color: theme !== 'dark-theme' ? 'black' : 'white',
                 borderRadius: '8px',
                 boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                 marginBottom: '8px',
@@ -24,13 +26,15 @@ const LeaderCard = ({ player }) => {
 };
 
 const UserCard = ({ player }) => {
+    const { theme } = useStore();
     return (
         <div
             style={{
                 display: 'flex',
                 alignItems: 'center',
                 padding: '12px',
-                backgroundColor: 'white',
+                backgroundColor: theme !== 'dark-theme' ? 'white' : 'black',
+                color: theme !== 'dark-theme' ? 'black' : 'white',
                 borderRadius: '8px',
                 boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                 marginBottom: '8px',

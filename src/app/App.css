@@ -2,23 +2,6 @@
     text-align: center;
 }
 
-button {
-    display: flex;
-    text-align: center;
-    align-items: center;
-    padding: 12px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
-    margin-bottom: 8px;
-    transition: all 0, 5s ease;
-    margin: 10px auto;
-}
-
-button:hover {
-    background-color: red;
-}
-
 input {
     font-size: 20px;
     font-family: inherit;

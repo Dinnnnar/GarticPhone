@@ -7,7 +7,7 @@ import { useStore } from '../store/store';
 function DrawComponent() {
     const [roomId, setRoomId] = useState(null);
     const canvasRef = useRef();
-    const { data } = useStore();
+    const { data, theme } = useStore();
 
     useEffect(() => {
         const query = new URLSearchParams(location.search);
@@ -25,7 +25,9 @@ function DrawComponent() {
         <div className="Draw">
             <Timer />
             <div>
-                <h1>{data ? data : 'Draw what you want'}</h1>
+                <h1 style={{ color: theme === 'dark-theme' ? 'white' : 'black' }}>
+                    {data ? data : 'Draw what you want'}
+                </h1>
                 <canvas
                     style={{
                         border: '2px solid #ddd',
@@ -37,8 +39,8 @@ function DrawComponent() {
                         maxWidth: '100%',
                         height: 'auto',
                     }}
-                    width={300}
-                    height={350}
+                    width={window.innerWidth * 0.95}
+                    height={window.innerWidth * 0.95 * (350 / 300)}
                     ref={canvasRef}
                 />
             </div>

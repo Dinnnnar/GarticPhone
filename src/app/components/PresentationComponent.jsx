@@ -5,6 +5,7 @@ import Canvas from './Canvas';
 import PlayersButtonList from './PlayersButtonList';
 
 const Card = ({ player, isSelected = false, children }) => {
+    const { theme } = useStore();
     return (
         <div
             style={{
@@ -12,7 +13,11 @@ const Card = ({ player, isSelected = false, children }) => {
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 padding: '12px',
-                backgroundColor: isSelected ? '#e0f7fa' : '#f9f9f9',
+                backgroundColor: isSelected
+                    ? '#e0f7fa'
+                    : theme === 'light-theme'
+                    ? '#f9f9f9'
+                    : '#0d96e6',
                 borderRadius: '8px',
                 boxShadow: isSelected
                     ? '0 4px 8px rgba(0, 0, 0, 0.2)'
@@ -20,6 +25,7 @@ const Card = ({ player, isSelected = false, children }) => {
                 marginBottom: '12px',
                 border: isSelected ? '2px solid #00796b' : 'none',
                 wordWrap: 'break-word',
+                color: theme === 'light-theme' ? 'black' : 'white',
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
@@ -37,7 +43,7 @@ const Card = ({ player, isSelected = false, children }) => {
                 <span
                     style={{
                         fontWeight: 'bold',
-                        color: isSelected ? '#00796b' : '#333',
+                        color: isSelected ? '#00796b' : theme === 'light-theme' ? 'black' : 'white',
                     }}
                 >
                     {player.username}
@@ -46,7 +52,7 @@ const Card = ({ player, isSelected = false, children }) => {
             {children && (
                 <div
                     style={{
-                        backgroundColor: '#ffffff',
+                        backgroundColor: theme === 'light-theme' ? '#ffffff' : '#40a7e3',
                         padding: '8px 12px',
                         borderRadius: '8px',
                         color: '#555',
@@ -65,6 +71,7 @@ const Card = ({ player, isSelected = false, children }) => {
 const PlayersList = () => {
     const { lobbyList } = useStore();
     const [username, setUsername] = useState('');
+    const { theme } = useStore();
 
     useEffect(() => {
         const handleUsername = ({ username }) => {
@@ -98,6 +105,7 @@ const PlayersList = () => {
 function PresentationComponent() {
     const [data, setData] = useState([]);
     const { isLeader } = useStore();
+    const { theme } = useStore();
 
     useEffect(() => {
         const handleData = ({ data, member }) => {
@@ -105,7 +113,9 @@ function PresentationComponent() {
                 ...prevData,
                 <Card key={member.id} player={member}>
                     {typeof data === 'string' ? (
-                        <h2>{data}</h2>
+                        <h2 style={{ color: theme === 'light-theme' ? 'black' : 'white' }}>
+                            {data}
+                        </h2>
                     ) : data == null ? (
                         <h2>No comments</h2>
                     ) : (

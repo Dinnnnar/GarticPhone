@@ -19,6 +19,8 @@ export const useStore = create((set) => ({
     updateRoomId: (newRoomId) => set({ roomId: newRoomId }),
     data: null,
     updateData: (newData) => set({ data: newData }),
+    theme: 'light-theme',
+    updateTheme: (newTheme) => set({ theme: newTheme }),
     // selectedUser: '',
     // updateSelectedUser: (newUser) => set({ selectedUser: newUser }),
 }));

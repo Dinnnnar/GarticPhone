@@ -69,8 +69,8 @@ function Canvas({ data, width = 300, height = 350, duration = 2000 }) {
                     maxWidth: '100%',
                     height: 'auto',
                 }}
-                width={width}
-                height={height}
+                width={window.innerWidth * 0.95}
+                height={window.innerWidth * 0.95 * (350 / 300)}
                 ref={canvasRef}
             />
         </div>

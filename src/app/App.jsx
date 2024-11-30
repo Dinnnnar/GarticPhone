@@ -23,6 +23,8 @@ const App = () => {
         block,
         updateRoomId,
         updateData,
+        updateTheme,
+        theme,
     } = useStore();
 
     useEffect(() => {
@@ -92,6 +94,13 @@ const App = () => {
             tg.ready();
             const user = tg.initDataUnsafe.user;
 
+            console.log(window.Telegram.WebApp.themeParams.bg_color);
+
+            if (window.Telegram.WebApp.themeParams.bg_color !== '#ffffff') {
+                updateTheme('dark-theme');
+                console.log(theme);
+            }
+
             if (user) {
                 const telegramUsername = `${user.first_name}${
                     user.last_name ? ' ' + user.last_name : ''
@@ -121,7 +130,9 @@ const App = () => {
 
     return (
         <>
-            {phase === 'lobby' && <h1 style={{ fontSize: '24px', textAlign: 'center' }}>Лобби</h1>}
+            {phase === 'lobby' && (
+                <h1 style={{ color: theme === 'dark-theme' ? 'white' : 'black' }}>Лобби</h1>
+            )}
             {phase === 'lobby' && <LobbyList />}
             {phase === 'lobby' && <StartButton />}
 
@@ -138,6 +149,7 @@ const App = () => {
                 <>
                     <h2>Игра уже началась</h2>
                     <div
+                        className={theme + '_noConnected'}
                         style={{
                             display: 'flex',
                             alignItems: 'center',

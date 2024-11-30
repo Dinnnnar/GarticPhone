@@ -5,7 +5,7 @@ import Timer from './Timer';
 import Canvas from './Canvas';
 
 function DescribeComponent() {
-    const { block } = useStore();
+    const { block, theme } = useStore();
     const [roomId, setRoomId] = useState(null);
     const [data, setData] = useState(null);
 
@@ -47,7 +47,9 @@ function DescribeComponent() {
             {data !== null && !block && <Canvas data={data} />}
             {!block && (
                 <>
-                    <h2>Напишите тему</h2>
+                    <h2 style={{ color: theme === 'dark-theme' ? 'white' : 'black' }}>
+                        Опишите рисунок
+                    </h2>
                     <input id="initialtext" type="text" maxLength="50"></input>
                     <br />
                     <button id="submitThemeButton" onClick={handleClick}>
