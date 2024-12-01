@@ -16,6 +16,8 @@ const StartButton = () => {
                     padding: '12px 24px',
                     borderRadius: '8px',
                     cursor: 'pointer',
+                    fontFamily: 'Oswald',
+                    fontSize: '20px',
                     boxShadow:
                         theme === 'light-theme'
                             ? '0 2px 4px rgba(0, 0, 0, 0.5)'

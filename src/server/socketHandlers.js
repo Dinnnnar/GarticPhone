@@ -236,7 +236,14 @@ function handleData(io, socket, data, roomId) {
     }
 
     const number = room.list[room.roundCount].findIndex((item) => item === member.number);
-    room.data[room.roundCount][number] = data;
+
+    if (typeof data === 'string') {
+        room.data[room.roundCount][number] = data.slice(0, 50);
+    } else {
+        room.data[room.roundCount][number] = data;
+    }
+
+    // room.data[room.roundCount][number] = data;
 
     // if (room.currentPhase !== 'drawPhase')
     console.log(room.data[room.roundCount]);

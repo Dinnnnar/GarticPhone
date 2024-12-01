@@ -19,9 +19,9 @@ const LeaderCard = ({ player }) => {
             <img
                 src={player.photoUrl || 'https://via.placeholder.com/50'}
                 alt={player.username}
-                style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }}
+                style={{ width: '60px', height: '60px', borderRadius: '50%', marginRight: '10px' }}
             />
-            <span style={{ fontFamily: 'Oswald', fontSize: '20px' }}>{player.username}</span>
+            <span style={{ fontFamily: 'Oswald', fontSize: '22px' }}>{player.username}</span>
         </div>
     );
 };
@@ -44,9 +44,9 @@ const UserCard = ({ player }) => {
             <img
                 src={player.photoUrl || 'https://via.placeholder.com/50'}
                 alt={player.username}
-                style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }}
+                style={{ width: '60px', height: '60px', borderRadius: '50%', marginRight: '10px' }}
             />
-            <span style={{ fontFamily: 'Oswald', fontSize: '20px' }}>{player.username}</span>
+            <span style={{ fontFamily: 'Oswald', fontSize: '22px' }}>{player.username}</span>
         </div>
     );
 };

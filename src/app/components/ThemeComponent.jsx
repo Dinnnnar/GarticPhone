@@ -30,7 +30,13 @@ function ThemeComponent() {
             >
                 {!block && (
                     <>
-                        <h2 style={{ color: theme === 'dark-theme' ? 'white' : 'black' }}>
+                        <h2
+                            style={{
+                                color: theme === 'dark-theme' ? 'white' : 'black',
+                                fontFamily: 'Oswald',
+                                fontSize: '40px',
+                            }}
+                        >
                             Напишите тему
                         </h2>
                         <div
@@ -53,6 +59,7 @@ function ThemeComponent() {
                                         handleClick();
                                     }
                                 }}
+                                placeholder="Тема"
                                 style={{
                                     width: '90%',
                                     padding: '10px',
@@ -69,6 +76,8 @@ function ThemeComponent() {
                                     padding: '12px 24px',
                                     borderRadius: '8px',
                                     cursor: 'pointer',
+                                    fontFamily: 'Oswald',
+                                    fontSize: '20px',
                                     boxShadow:
                                         theme === 'light-theme'
                                             ? '0 2px 4px rgba(0, 0, 0, 0.5)'
