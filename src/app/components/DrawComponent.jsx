@@ -25,7 +25,13 @@ function DrawComponent() {
         <div className="Draw">
             <Timer />
             <div>
-                <h1 style={{ color: theme === 'dark-theme' ? 'white' : 'black' }}>
+                <h1
+                    style={{
+                        fontFamily: 'Oswald',
+                        fontSize: '40px',
+                        color: theme === 'dark-theme' ? 'white' : 'black',
+                    }}
+                >
                     {data ? data : 'Draw what you want'}
                 </h1>
                 <canvas

@@ -28,7 +28,7 @@ const Card = ({ player, isSelected = false, children }) => {
                 color: theme === 'light-theme' ? 'black' : 'white',
             }}
         >
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
                 <img
                     src={player.photoUrl || 'https://via.placeholder.com/50'}
                     alt={player.username}

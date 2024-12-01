@@ -4,9 +4,31 @@ const rooms = {};
 
 export function setupSocketHandlers(io) {
     io.on('connection', (socket) => {
-        socket.on('join-room', ({ roomId, username, photoUrl }) =>
-            joinRoom(io, socket, roomId, username, photoUrl)
-        );
+        socket.on('join-room', ({ roomId, username, photoUrl }) => {
+            let room = rooms[roomId];
+
+            if (!room) {
+                room = rooms[roomId] = {
+                    currentPhase: 'lobby',
+                    members: [],
+                    playerCount: 0,
+                    data: [],
+                    timer: null,
+                };
+            }
+
+            const existingUserIndex = rooms[roomId]?.members?.findIndex(
+                (member) => member.username === username
+            );
+
+            if (room.currentPhase !== 'lobby' && existingUserIndex === -1) {
+                console.log('no way', room.currentPhase, existingUserIndex);
+                socket.emit('connection-error');
+                socket.disconnect();
+                return;
+            }
+            joinRoom(io, socket, roomId, username, photoUrl);
+        });
         socket.on('disconnect', (reason) => disconnectUser(io, socket, reason));
         socket.on('start-game', (roomId) => startGame(io, socket, roomId));
         socket.on('data', ({ data, roomId }) => handleData(io, socket, data, roomId));
@@ -15,6 +37,7 @@ export function setupSocketHandlers(io) {
             handleUserDataRequest(io, socket, data, roomId)
         );
         socket.on('timer', (roomId) => handleTimer(io, socket, roomId));
+        socket.on('restart', ({ roomId }) => handleRestart(io, socket, roomId));
     });
 }
 
@@ -25,6 +48,7 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
 
     if (!rooms[roomId]) {
         rooms[roomId] = { members: [], currentPhase: 'lobby', data: [] };
+        console.log('start a new game');
     }
 
     const existingUserIndex = rooms[roomId]?.members?.findIndex(
@@ -32,6 +56,7 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
     );
 
     if (rooms[roomId].currentPhase !== 'lobby' && existingUserIndex === -1) {
+        socket.emit('connection-error', { reason: 'Room is not in lobby phase' });
         socket.emit('phase-updated', { newPhase: 'noconnected' });
         return;
     }
@@ -87,6 +112,27 @@ function joinRoom(io, socket, roomId, username, photoUrl) {
         })),
         newPhase: rooms[roomId].currentPhase,
     });
+}
+
+function handleRestart(io, socket, roomId) {
+    const roomSockets = io.sockets.adapter.rooms.get(roomId);
+    const room = rooms[roomId];
+    console.log(roomId);
+
+    // Отключаем всех пользователей в комнате
+    // if (roomSockets) {
+    //     roomSockets.forEach((socketId) => {
+    //         const clientSocket = io.sockets.sockets.get(socketId);
+    //         if (clientSocket) {
+    //             clientSocket.disconnect();
+    //         }
+    //     });
+    // }
+
+    room.currentPhase = 'lobby';
+    room.data = [];
+
+    io.emit('phase-updated', { newPhase: 'lobby' });
 }
 
 function disconnectUser(io, socket, reason) {
@@ -149,6 +195,8 @@ function startGame(io, socket, roomId) {
         block: false,
     }));
 
+    console.log(room.list);
+
     console.log('\n');
 
     setTimer(io, roomId, 15000, 'themePhase');
@@ -190,7 +238,8 @@ function handleData(io, socket, data, roomId) {
     const number = room.list[room.roundCount].findIndex((item) => item === member.number);
     room.data[room.roundCount][number] = data;
 
-    if (room.currentPhase !== 'drawPhase') console.log(room.data[room.roundCount]);
+    // if (room.currentPhase !== 'drawPhase')
+    console.log(room.data[room.roundCount]);
 
     const receivedDataCount = room.data[room.roundCount].filter(
         (item) => item && typeof item === 'string'
@@ -253,6 +302,7 @@ async function handleUserDataRequest(io, socket, data, roomId) {
         if (i === 0) {
             io.emit('selectedUser', { username: member.username });
         }
+        console.log('content:', content);
         io.emit('userContentArray', { data: content, member: member });
     }
 }

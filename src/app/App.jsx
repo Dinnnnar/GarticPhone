@@ -28,11 +28,21 @@ const App = () => {
     } = useStore();
 
     useEffect(() => {
+        // let reconnectInterval;
+
+        const handleConnectionError = () => {
+            console.log('Failed to join room:');
+            updatePhase('noconnected');
+            // connectSocket();
+        };
+
         if (socket.connected) {
             socket.disconnect();
         }
 
         socket.connect();
+
+        // connectSocket();
         updateRoomId(roomId);
 
         const handleRoomUpdated = ({ members, newPhase }) => {
@@ -82,11 +92,23 @@ const App = () => {
             updateData(data);
         };
 
+        // if (phase === 'lobby') {
+        //     socket.on('room-joined', handleRoomJoined);
+        //     socket.on('block', handleBlock);
+        //     socket.on('room-updated', handleRoomUpdated);
+        //     socket.on('phase-updated', handlePhaseUpdated);
+        //     socket.on('data', handleData);
+        //     socket.on('connection-error', handleConnectionError);
+        // } else {
+        //     socket.off('room-updated', handleRoomUpdated);
+        // }
+
         socket.on('room-joined', handleRoomJoined);
         socket.on('block', handleBlock);
         socket.on('room-updated', handleRoomUpdated);
         socket.on('phase-updated', handlePhaseUpdated);
         socket.on('data', handleData);
+        socket.on('connection-error', handleConnectionError);
 
         const tg = window.Telegram.WebApp;
 
@@ -124,6 +146,8 @@ const App = () => {
             socket.off('block', handleBlock);
             socket.off('phase-updated', handlePhaseUpdated);
             socket.off('data', handleData);
+            socket.off('connection-error', handleConnectionError);
+            // clearTimeout(reconnectInterval);
             socket.disconnect();
         };
     }, []);
@@ -131,7 +155,15 @@ const App = () => {
     return (
         <>
             {phase === 'lobby' && (
-                <h1 style={{ color: theme === 'dark-theme' ? 'white' : 'black' }}>Лобби</h1>
+                <h1
+                    style={{
+                        fontFamily: 'Oswald',
+                        fontSize: '40px',
+                        color: theme === 'dark-theme' ? 'white' : 'black',
+                    }}
+                >
+                    Лобби
+                </h1>
             )}
             {phase === 'lobby' && <LobbyList />}
             {phase === 'lobby' && <StartButton />}
@@ -147,13 +179,21 @@ const App = () => {
 
             {phase === 'noconnected' && (
                 <>
-                    <h2>Игра уже началась</h2>
+                    <h2
+                        style={{
+                            fontFamily: 'Oswald',
+                            fontSize: '40px',
+                            color: theme === 'dark-theme' ? 'white' : 'black',
+                        }}
+                    >
+                        Игра уже началась
+                    </h2>
                     <div
                         className={theme + '_noConnected'}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
-                            padding: '12px',
+                            padding: '9px',
                         }}
                     >
                         <img

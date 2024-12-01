@@ -33,27 +33,54 @@ function ThemeComponent() {
                         <h2 style={{ color: theme === 'dark-theme' ? 'white' : 'black' }}>
                             Напишите тему
                         </h2>
-                        <input id="initialtext" type="text" maxLength="50" />
-                        <br />
-                        <button
+                        <div
                             style={{
-                                backgroundColor: theme === 'light-theme' ? '#333' : '#40a7e3',
-                                color: '#fff',
-                                border: 'none',
-                                padding: '12px 24px',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                boxShadow:
-                                    theme === 'light-theme'
-                                        ? '0 2px 4px rgba(0, 0, 0, 0.5)'
-                                        : '0 2px 4px rgba(0, 0, 0, 0.2)',
-                                transition: 'background-color 0.3s, transform 0.3s',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '12px',
+                                width: '100%',
+                                maxWidth: '400px',
+                                margin: '0 auto',
                             }}
-                            id="submitThemeButton"
-                            onClick={handleClick}
                         >
-                            Отправить
-                        </button>
+                            <input
+                                id="initialtext"
+                                type="text"
+                                maxLength="50"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleClick();
+                                    }
+                                }}
+                                style={{
+                                    width: '90%',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #ccc',
+                                    fontSize: '16px',
+                                }}
+                            />
+                            <button
+                                style={{
+                                    backgroundColor: theme === 'light-theme' ? '#333' : '#40a7e3',
+                                    color: '#fff',
+                                    border: 'none',
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    boxShadow:
+                                        theme === 'light-theme'
+                                            ? '0 2px 4px rgba(0, 0, 0, 0.5)'
+                                            : '0 2px 4px rgba(0, 0, 0, 0.2)',
+                                    transition: 'background-color 0.3s, transform 0.3s',
+                                }}
+                                id="submitThemeButton"
+                                onClick={handleClick}
+                            >
+                                Отправить
+                            </button>
+                        </div>
                     </>
                 )}
                 {block && (

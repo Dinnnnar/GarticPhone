@@ -71,7 +71,15 @@ const UserCard = ({ player }) => {
 };
 
 const PlayersButtonList = () => {
-    const { lobbyList } = useStore();
+    const { lobbyList, theme } = useStore();
+
+    const query = new URLSearchParams(location.search);
+    const roomId = query.get('room');
+
+    function handleRestart() {
+        socket.emit('restart', { roomId: roomId });
+    }
+
     return (
         <div
             style={{
@@ -85,6 +93,47 @@ const PlayersButtonList = () => {
             {lobbyList.map((player) => (
                 <UserCard key={player.id} player={player} />
             ))}
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    padding: '10px 16px',
+                    backgroundColor: theme === 'light-theme' ? '#fff' : '#0d96e6',
+                    border: '1px solid rgb(221, 221, 221)',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(1, 0, 0, 0.1)',
+                    margin: '10px 3px',
+                    wordWrap: 'break-word',
+                    color: theme === 'light-theme' ? 'black' : 'white',
+                }}
+            >
+                <button
+                    style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                    onClick={handleRestart}
+                    aria-label="Перезапуск"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        width="24px"
+                        height="24px"
+                    >
+                        <path d="M12 2a10 10 0 1 0 7.071 2.929l-1.414 1.415A8 8 0 1 1 12 4v3.586l3.536-3.536L12 1V2ZM12 13h2v2h-4v-4h2v2Z" />
+                    </svg>
+                </button>
+            </div>
         </div>
     );
 };
