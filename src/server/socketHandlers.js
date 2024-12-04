@@ -131,8 +131,18 @@ function handleRestart(io, socket, roomId) {
 
     room.currentPhase = 'lobby';
     room.data = [];
+    room.members = rooms[roomId].members.map((member) => ({
+        id: member.id,
+        username: member.username,
+        photoUrl: member.photoUrl,
+        isLeader: member.isLeader,
+        block: false,
+    }));
 
-    io.emit('phase-updated', { newPhase: 'lobby' });
+    io.to(roomId).emit('room-updated', {
+        members: room.members,
+        newPhase: room.currentPhase,
+    });
 }
 
 function disconnectUser(io, socket, reason) {
@@ -299,7 +309,7 @@ async function handleUserDataRequest(io, socket, data, roomId) {
     const user = room.members[userIndex];
 
     const number = room.list[0].findIndex((item) => item === user.number);
-    io.emit('clear');
+    io.to(roomId).emit('clear');
 
     for (let i = 0; i < room.finalCount; i++) {
         const content = room.data[i][number];
@@ -310,7 +320,7 @@ async function handleUserDataRequest(io, socket, data, roomId) {
             io.emit('selectedUser', { username: member.username });
         }
         console.log('content:', content);
-        io.emit('userContentArray', { data: content, member: member });
+        io.to(roomId).emit('userContentArray', { data: content, member: member });
     }
 }
 
@@ -335,7 +345,7 @@ function setTimer(io, roomId, time, nextPhase) {
     if (room.roundCount === room.finalCount) {
         room.currentPhase = 'presentation';
         console.log(`Current round: ${room.roundCount} - ${room.currentPhase}`);
-        io.emit('phase-updated', { newPhase: 'presentation' });
+        io.to(roomId).emit('phase-updated', { newPhase: 'presentation' });
         return;
     }
 
@@ -343,7 +353,7 @@ function setTimer(io, roomId, time, nextPhase) {
 
     console.log(`Current round: ${room.roundCount} - ${room.currentPhase}`);
 
-    io.emit('phase-updated', { newPhase: room.currentPhase });
+    io.to(roomId).emit('phase-updated', { newPhase: room.currentPhase });
 
     const endTime = Math.floor((Date.now() + time) / 1000);
     room.timer = time / 1000;

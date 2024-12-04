@@ -93,7 +93,7 @@ const PlayersButtonList = () => {
             {lobbyList.map((player) => (
                 <UserCard key={player.id} player={player} />
             ))}
-            <div
+            {/* <div
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -133,7 +133,7 @@ const PlayersButtonList = () => {
                         <path d="M12 2a10 10 0 1 0 7.071 2.929l-1.414 1.415A8 8 0 1 1 12 4v3.586l3.536-3.536L12 1V2ZM12 13h2v2h-4v-4h2v2Z" />
                     </svg>
                 </button>
-            </div>
+            </div> */}
         </div>
     );
 };

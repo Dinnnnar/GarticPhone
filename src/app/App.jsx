@@ -51,10 +51,12 @@ const App = () => {
             const isLeader = currentUser?.isLeader;
             updateIsLeader(isLeader);
             updateLobbyList(members);
+            updatePhase(newPhase);
 
-            if (newPhase != phase) {
-                updatePhase(newPhase);
-            }
+            // if (newPhase != phase) {
+            //     console.log('soemthing');
+            //     updatePhase(newPhase);
+            // }
 
             if (currentUser?.block) updateBlock(currentUser?.block);
         };
