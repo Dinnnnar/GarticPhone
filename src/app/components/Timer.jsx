@@ -6,8 +6,7 @@ function Timer() {
     const [timer, setTimer] = useState(0);
 
     useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        const roomId = query.get('room');
+        const roomId = window.Telegram.WebApp.initDataUnsafe.start_param;
 
         socket.emit('timer', roomId);
 

@@ -4,8 +4,7 @@ import { useStore } from '../store/store';
 
 const UserCard = ({ player }) => {
     const [isDisabled, setIsDisabled] = useState(false);
-    const query = new URLSearchParams(location.search);
-    const roomId = query.get('room');
+    const roomId = window.Telegram.WebApp.initDataUnsafe.start_param;
     const { theme } = useStore();
 
     const handleUserClick = (username) => {
@@ -73,8 +72,7 @@ const UserCard = ({ player }) => {
 const PlayersButtonList = () => {
     const { lobbyList, theme } = useStore();
 
-    const query = new URLSearchParams(location.search);
-    const roomId = query.get('room');
+    const roomId = window.Telegram.WebApp.initDataUnsafe.start_param;
 
     function handleRestart() {
         socket.emit('restart', { roomId: roomId });

@@ -5,8 +5,7 @@ import Timer from './Timer';
 
 function ThemeComponent() {
     const { block, theme } = useStore();
-    const query = new URLSearchParams(location.search);
-    const roomId = query.get('room');
+    const roomId = window.Telegram.WebApp.initDataUnsafe.start_param;
 
     const handleClick = () => {
         document.getElementById('submitThemeButton').setAttribute('disabled', 'disabled');

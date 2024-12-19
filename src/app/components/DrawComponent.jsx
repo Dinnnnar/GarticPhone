@@ -10,8 +10,7 @@ function DrawComponent() {
     const { data, theme } = useStore();
 
     useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        const room = query.get('room');
+        const room = window.Telegram.WebApp.initDataUnsafe.start_param;
         setRoomId(room);
     }, []);
 

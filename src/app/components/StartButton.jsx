@@ -3,8 +3,7 @@ import { useStore } from '../store/store';
 
 const StartButton = () => {
     const { isLeader, theme } = useStore(); // Получаем тему из хранилища
-    const query = new URLSearchParams(location.search);
-    const roomId = query.get('room');
+    const roomId = window.Telegram.WebApp.initDataUnsafe.start_param;
 
     return (
         isLeader && (

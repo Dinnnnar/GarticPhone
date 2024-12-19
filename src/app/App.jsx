@@ -11,9 +11,7 @@ import DescribeComponent from './components/DescribeComponent';
 import PresentationComponent from './components/PresentationComponent';
 
 const App = () => {
-    const query = new URLSearchParams(location.search);
-
-    const roomId = query.get('room');
+    const roomId = window.Telegram.WebApp.initDataUnsafe.start_param;
     const {
         updateLobbyList,
         updateIsLeader,
